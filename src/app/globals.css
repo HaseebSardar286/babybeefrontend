@@ -1,27 +1,143 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --color-primary: #b5374a;
+  --color-primary-light: #d4606f;
+  --color-primary-dark: #8c2536;
+  --color-blush: #f7e8ea;
+  --color-blush-mid: #f0d0d4;
+  --color-cream: #fdf6f0;
+  --color-sand: #e8ddd0;
+  --color-sage: #8aab97;
+  --color-teal: #5a9a8c;
+  --color-text-dark: #2c1a1f;
+  --color-text-mid: #5c3d44;
+  --color-text-light: #9e7a82;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
+html,
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-cream);
+  color: var(--color-text-dark);
+  font-family: 'Roboto', sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Lora', serif;
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  color: white;
+  background-color: var(--color-primary);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(181, 55, 74, 0.3);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  background: transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-outline:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* ── Input ── */
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-sand);
+  outline: none;
+  font-size: 0.875rem;
+  background: white;
+  color: var(--color-text-dark);
+  transition: all 0.2s ease;
+}
+.input-field::placeholder {
+  color: var(--color-text-light);
+}
+.input-field:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(181, 55, 74, 0.1);
+}
+
+/* ── Tag badge ── */
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--color-blush);
+  color: var(--color-primary);
+}
+
+/* ── Nav link ── */
+.nav-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  position: relative;
+  padding-bottom: 0.25rem;
+  color: var(--color-text-mid);
+  text-decoration: none;
+}
+.nav-link:hover {
+  color: var(--color-primary);
+}
+.nav-link.active {
+  color: var(--color-primary);
+}
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+  border-radius: 2px;
+}
+
+/* ── Section title ── */
+.section-title {
+  font-family: 'Lora', serif;
+  color: var(--color-text-dark);
 }
