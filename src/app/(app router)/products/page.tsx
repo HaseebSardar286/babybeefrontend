@@ -1,11 +1,11 @@
 "use client";
 
-import Navbar from "@/src/components/Navbar";
 import Footer from "@/src/components/Footer";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { getAllProducts, filterByCategory, searchProducts, BackendProduct, formatPKR } from "@/src/services/productService";
 import { useCart } from "@/src/context/CartContext";
+import { useSearchParams } from "next/navigation";
 
 const sizes = ["Newborn", "0-3 Months", "3-6 Months", "6-12 Months", "12-24 Months"];
 const colorDots = ["#d4a373", "#8aab97", "#9ac1d4", "#c9a96e", "#b5c4b1"];
@@ -14,13 +14,30 @@ const CARD_COLORS = ["#f7f0e8", "#e8f0e8", "#e8eef5", "#f5eee8", "#eee8f5", "#e8
 const CARD_EMOJIS = ["👕", "🧥", "🌿", "🛏️", "🍼", "🎁", "👶", "🧸"];
 
 export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div>Loading products...</div>}>
+      <ProductsContent />
+    </Suspense>
+  );
+}
+
+function ProductsContent() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+
   const [products, setProducts] = useState<BackendProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam || "All");
   const [sortBy, setSortBy] = useState("Most Popular");
   const [keyword, setKeyword] = useState("");
   const { addToCart, loading: cartLoading } = useCart();
+
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [categoryParam]);
 
   useEffect(() => {
     fetchProducts();
@@ -65,7 +82,6 @@ export default function ProductsPage() {
 
   return (
     <>
-      <Navbar />
       <main className="min-h-screen" style={{ backgroundColor: "var(--color-cream)" }}>
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-6 py-4 text-xs" style={{ color: "var(--color-text-light)" }}>

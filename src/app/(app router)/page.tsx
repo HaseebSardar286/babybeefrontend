@@ -1,6 +1,5 @@
 "use client";
 
-import Navbar from "@/src/components/Navbar";
 import Footer from "@/src/components/Footer";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -48,7 +47,6 @@ export default function HomePage() {
 
   return (
     <>
-      <Navbar />
       <main>
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section

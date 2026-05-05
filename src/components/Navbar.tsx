@@ -1,12 +1,46 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/src/context/CartContext";
+import { useRouter } from "next/navigation";
+import { logout } from "@/src/services/authService";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { count } = useCart();
+  const { count, refresh: refreshCart } = useCart();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token && token !== "null") {
+      setIsLoggedIn(true);
+      try {
+        const parts = token.split('.');
+        if (parts.length > 1) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload.role && payload.role.toUpperCase() === "ADMIN") {
+            setIsAdmin(true);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to decode token", e);
+      }
+    } else {
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    refreshCart(); // Clear cart items from state
+    router.push("/login");
+  };
 
   const navLinks = [
     { label: "Shop All", href: "/products" },
@@ -46,9 +80,9 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
-          {/* Wishlist icon */}
+          {/* Wishlist icon - now pointing to products since wishlist doesn't exist */}
           <Link
-            href="/wishlist"
+            href="/products"
             aria-label="Wishlist"
             style={{ color: "var(--color-text-mid)" }}
           >
@@ -99,27 +133,59 @@ export default function Navbar() {
             )}
           </Link>
 
-          {/* User icon */}
-          <Link
-            href="/login"
-            aria-label="Account"
-            style={{ color: "var(--color-text-mid)" }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.8}
-              stroke="currentColor"
-              className="w-5 h-5"
+          {/* User icon / Logout */}
+          {isLoggedIn ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href={isAdmin ? "/admin" : "/products"}
+                aria-label="Account"
+                style={{ color: "var(--color-text-mid)" }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.8}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                  />
+                </svg>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-sand hover:bg-sand transition-colors"
+                style={{ color: "var(--color-text-mid)" }}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              aria-label="Account"
+              style={{ color: "var(--color-text-mid)" }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-              />
-            </svg>
-          </Link>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.8}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                />
+              </svg>
+            </Link>
+          )}
 
           {/* Mobile hamburger */}
           <button

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { CartProvider } from "@/src/context/CartContext";
-
 export const metadata: Metadata = {
   title: "BabyBee — Nurturing Little Ones",
   description: "Thoughtfully curated baby essentials made from organic and sustainable materials.",
@@ -23,9 +21,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--color-cream)" }}>
-        <CartProvider>
-          {children}
-        </CartProvider>
+        {children}
       </body>
     </html>
   );

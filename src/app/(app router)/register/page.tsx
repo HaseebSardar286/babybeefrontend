@@ -3,7 +3,6 @@
 import { register } from "@/src/services/authService";
 import { useState } from "react";
 import Link from "next/link";
-import Navbar from "@/src/components/Navbar";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -48,12 +47,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <>
-      <Navbar />
-      <main
-        className="flex-1 flex items-center justify-center px-4 py-16"
-        style={{ backgroundColor: "var(--color-cream)" }}
-      >
+    <main
+      className="flex-1 flex items-center justify-center px-4 py-16"
+      style={{ backgroundColor: "var(--color-cream)" }}
+    >
         <div className="w-full max-w-md">
           <div
             className="rounded-3xl p-8 shadow-sm"
@@ -244,6 +241,5 @@ export default function RegisterPage() {
           </div>
         </div>
       </main>
-    </>
-  );
-}
+    );
+  }

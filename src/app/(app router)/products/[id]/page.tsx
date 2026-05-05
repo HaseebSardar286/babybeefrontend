@@ -1,6 +1,5 @@
 "use client";
 
-import Navbar from "@/src/components/Navbar";
 import Footer from "@/src/components/Footer";
 import Link from "next/link";
 import { useState, use, useEffect } from "react";
@@ -37,7 +36,6 @@ export default function ProductDetailPage({
   if (loading) {
     return (
       <>
-        <Navbar />
         <main className="min-h-screen" style={{ backgroundColor: "var(--color-cream)" }}>
           <div className="max-w-7xl mx-auto px-6 py-20 flex flex-col md:flex-row gap-12 animate-pulse">
             <div className="md:w-1/2 rounded-3xl h-96" style={{ backgroundColor: "var(--color-sand)" }} />
@@ -57,7 +55,6 @@ export default function ProductDetailPage({
   if (!product) {
     return (
       <>
-        <Navbar />
         <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--color-cream)" }}>
           <div className="text-center">
             <p className="text-5xl mb-4">🔍</p>
@@ -74,7 +71,6 @@ export default function ProductDetailPage({
 
   return (
     <>
-      <Navbar />
       <main style={{ backgroundColor: "var(--color-cream)" }}>
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-6 py-4 text-xs" style={{ color: "var(--color-text-light)" }}>

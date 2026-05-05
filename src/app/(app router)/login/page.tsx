@@ -3,9 +3,10 @@
 import { login } from "@/src/services/authService";
 import { useState } from "react";
 import Link from "next/link";
-import Navbar from "@/src/components/Navbar";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,8 +21,26 @@ export default function LoginPage() {
     setError("");
     try {
       const res = await login(email, password);
+      
+      if (!res.token) {
+        setError(res.message || "Login failed. Please check your credentials.");
+        return;
+      }
+
       localStorage.setItem("token", res.token);
-      window.location.href = "/";
+      
+      try {
+        const payload = JSON.parse(atob(res.token.split('.')[1]));
+        if (payload.role && payload.role.toUpperCase() === "ADMIN") {
+          router.push("/admin");
+          return;
+        }
+      } catch (e) {
+        console.error("Failed to decode token", e);
+      }
+      
+      router.push("/");
+      router.refresh();
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
@@ -33,12 +52,10 @@ export default function LoginPage() {
   };
 
   return (
-    <>
-      <Navbar />
-      <main
-        className="flex-1 flex items-center justify-center px-4 py-16"
-        style={{ backgroundColor: "var(--color-cream)" }}
-      >
+    <main
+      className="flex-1 flex items-center justify-center px-4 py-16"
+      style={{ backgroundColor: "var(--color-cream)" }}
+    >
         <div className="w-full max-w-md">
           {/* Card */}
           <div
@@ -182,6 +199,5 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
-    </>
-  );
-}
+    );
+  }
