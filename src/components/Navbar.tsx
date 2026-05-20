@@ -18,7 +18,7 @@ export default function Navbar() {
     if (token && token !== "null") {
       setIsLoggedIn(true);
       try {
-        const parts = token.split('.');
+        const parts = token.split(".");
         if (parts.length > 1) {
           const payload = JSON.parse(atob(parts[1]));
           if (payload.role && payload.role.toUpperCase() === "ADMIN") {
@@ -42,13 +42,34 @@ export default function Navbar() {
     router.push("/login");
   };
 
+  const [categories, setCategories] = useState<
+    { name: string; slug: string }[]
+  >([]);
+
+  useEffect(() => {
+    // Prevent double slashes by normalizing the API URL
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.endsWith("/")
+      ? process.env.NEXT_PUBLIC_API_URL.slice(0, -1)
+      : process.env.NEXT_PUBLIC_API_URL;
+
+    fetch(`${baseUrl}/categories`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
+      .catch((err) => {
+        console.error("Failed to fetch categories", err);
+        setCategories([]);
+      });
+  }, []);
+
   const navLinks = [
     { label: "Shop All", href: "/products" },
-    { label: "Nursery", href: "/products?category=nursery" },
-    { label: "Feeding", href: "/products?category=feeding" },
-    { label: "Apparel", href: "/products?category=apparel" },
-    { label: "Wellness", href: "/products?category=wellness" },
-    { label: "Gifts", href: "/products?category=gifts" },
+    ...categories.map((cat) => ({
+      label: cat.name,
+      href: `/products?category=${cat.slug}`,
+    })),
   ];
 
   return (
