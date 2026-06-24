@@ -33,7 +33,22 @@ export default function CheckoutPage() {
     phone: "",
   });
 
-  const subtotal = items.reduce((acc, i) => acc + i.product.price * i.quantity, 0);
+  const getItemPrices = (item: any) => {
+    const matchingVariant = item.product.variants?.find(
+      (v: any) => v.size === item.size && v.color === item.color
+    );
+    const originalPrice = matchingVariant ? matchingVariant.price : item.product.price;
+    const hasDiscount = !!(item.product.discountPercent && item.product.discountPercent > 0);
+    const discountedPrice = hasDiscount
+      ? originalPrice * (1 - (item.product.discountPercent || 0) / 100)
+      : originalPrice;
+    return { originalPrice, discountedPrice, hasDiscount };
+  };
+
+  const subtotal = items.reduce((acc, item) => {
+    const { discountedPrice } = getItemPrices(item);
+    return acc + discountedPrice * item.quantity;
+  }, 0);
   const shipping = subtotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
   const tax = +(subtotal * TAX_RATE);
   const total = subtotal + shipping + tax;
@@ -279,23 +294,52 @@ export default function CheckoutPage() {
                     {items.map((item) => (
                       <div key={item.id} className="flex gap-3 items-start">
                         <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                          className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden border bg-white"
                           style={{ backgroundColor: "var(--color-sand)" }}
                         >
-                          {CARD_EMOJIS[item.product.id % CARD_EMOJIS.length]}
+                          {item.product.imageUrl || (item.product.images && item.product.images.length > 0) ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.product.imageUrl || (item.product.images && item.product.images[0])}
+                              alt={item.product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            CARD_EMOJIS[item.product.id % CARD_EMOJIS.length]
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate" style={{ color: "var(--color-text-dark)" }}>
+                          <p className="text-sm font-semibold truncate mb-0.5" style={{ color: "var(--color-text-dark)" }}>
                             {item.product.name}
                           </p>
-                          <div className="flex justify-between mt-1 items-center">
-                            <span className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>
-                              {formatPKR(item.product.price * item.quantity)}
-                            </span>
-                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "white", color: "var(--color-text-mid)" }}>
-                              Qty: {item.quantity}
-                            </span>
-                          </div>
+                          {(item.size || item.color) && (
+                            <p className="text-[10px] text-gray-500 truncate mb-1">
+                              {[
+                                item.size && `Size: ${item.size}`,
+                                item.color && `Color: ${item.color.split(":")[0]}`
+                              ].filter(Boolean).join(" | ")}
+                            </p>
+                          )}
+                          {(() => {
+                            const { originalPrice, discountedPrice, hasDiscount } = getItemPrices(item);
+                            return (
+                              <div className="flex justify-between mt-1 items-center">
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-semibold" style={{ color: "var(--color-text-dark)" }}>
+                                    {formatPKR(discountedPrice * item.quantity)}
+                                  </span>
+                                  {hasDiscount && (
+                                    <span className="text-[10px] text-gray-400 line-through">
+                                      {formatPKR(originalPrice * item.quantity)}
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "white", color: "var(--color-text-mid)" }}>
+                                  Qty: {item.quantity}
+                                </span>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                     ))}

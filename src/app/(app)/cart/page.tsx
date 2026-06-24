@@ -3,7 +3,7 @@
 import Footer from "@/src/components/Footer";
 import Link from "next/link";
 import { useCart } from "@/src/context/CartContext";
-import { formatPKR } from "@/src/services/productService";
+import { formatPKR, CartItem } from "@/src/services/productService";
 
 const CARD_EMOJIS = ["👕", "🧥", "🌿", "🛏️", "🍼", "🎁", "👶", "🧸"];
 const SHIPPING_THRESHOLD = 5000; // Free delivery over Rs. 5,000
@@ -13,10 +13,23 @@ const TAX_RATE = 0.17; // 17% GST Pakistan
 export default function CartPage() {
   const { items, count, loading, removeFromCart, updateQty } = useCart();
 
-  const subtotal = items.reduce(
-    (acc, i) => acc + i.product.price * i.quantity,
-    0,
-  );
+  const getItemPrices = (item: CartItem) => {
+    const matchingVariant = item.product.variants?.find(
+      (v) => v.size === item.size && v.color === item.color
+    );
+    const originalPrice = matchingVariant ? matchingVariant.price : item.product.price;
+    const hasDiscount = !!(item.product.discountPercent && item.product.discountPercent > 0);
+    const discountedPrice = hasDiscount
+      ? originalPrice * (1 - (item.product.discountPercent || 0) / 100)
+      : originalPrice;
+    return { originalPrice, discountedPrice, hasDiscount };
+  };
+
+  const subtotal = items.reduce((acc, item) => {
+    const { discountedPrice } = getItemPrices(item);
+    return acc + discountedPrice * item.quantity;
+  }, 0);
+
   const shipping = subtotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
   const gst = +(subtotal * TAX_RATE);
   const total = subtotal + shipping + gst;
@@ -157,16 +170,25 @@ export default function CartPage() {
                       }}
                     >
                       <div className="flex gap-4">
-                        {/* Emoji thumbnail */}
+                        {/* Dynamic Image or Emoji thumbnail */}
                         <Link
                           href={`/products/${item.product.id}`}
                           className="flex-shrink-0"
                         >
                           <div
-                            className="w-20 h-20 rounded-xl flex items-center justify-center text-4xl"
+                            className="w-20 h-20 rounded-xl flex items-center justify-center text-4xl overflow-hidden border"
                             style={{ backgroundColor: "var(--color-blush)" }}
                           >
-                            {CARD_EMOJIS[item.product.id % CARD_EMOJIS.length]}
+                            {item.product.imageUrl || (item.product.images && item.product.images.length > 0) ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={item.product.imageUrl || (item.product.images && item.product.images[0])}
+                                alt={item.product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              CARD_EMOJIS[item.product.id % CARD_EMOJIS.length]
+                            )}
                           </div>
                         </Link>
 
@@ -182,17 +204,39 @@ export default function CartPage() {
                                   {item.product.name}
                                 </h3>
                               </Link>
-                              {item.product.category && (
-                                <span
-                                  className="inline-block mt-0.5 text-xs px-2 py-0.5 rounded-full"
-                                  style={{
-                                    backgroundColor: "var(--color-blush)",
-                                    color: "var(--color-text-mid)",
-                                  }}
-                                >
-                                  {item.product.category}
-                                </span>
-                              )}
+                              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                                {item.product.category && (
+                                  <span
+                                    className="text-xs px-2 py-0.5 rounded-full"
+                                    style={{
+                                      backgroundColor: "var(--color-blush)",
+                                      color: "var(--color-text-mid)",
+                                    }}
+                                  >
+                                    {item.product.category}
+                                  </span>
+                                )}
+                                {item.size && (
+                                  <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-500 font-semibold uppercase tracking-wider">
+                                    Size: {item.size}
+                                  </span>
+                                )}
+                                {item.color && (
+                                  <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-500 font-semibold flex items-center gap-1">
+                                    Color: {item.color.includes(":") ? (
+                                      <>
+                                        <span
+                                          className="w-2.5 h-2.5 rounded-full inline-block border border-gray-300 flex-shrink-0"
+                                          style={{ backgroundColor: item.color.split(":")[1] }}
+                                        />
+                                        {item.color.split(":")[0]}
+                                      </>
+                                    ) : (
+                                      item.color
+                                    )}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             {/* Delete button */}
                             <button
@@ -219,56 +263,74 @@ export default function CartPage() {
                           </div>
 
                           {/* Unit price */}
-                          <p
-                            className="text-xs mt-1.5"
-                            style={{ color: "var(--color-primary)" }}
-                          >
-                            {formatPKR(item.product.price)} each
-                          </p>
+                          {(() => {
+                            const { originalPrice, discountedPrice, hasDiscount } = getItemPrices(item);
+                            return (
+                              <>
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  {hasDiscount ? (
+                                    <>
+                                      <span className="font-bold text-xs text-red-600">
+                                        {formatPKR(discountedPrice)}
+                                      </span>
+                                      <span className="text-[10px] text-gray-400 line-through">
+                                        {formatPKR(originalPrice)}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <span className="font-semibold text-xs" style={{ color: "var(--color-primary)" }}>
+                                      {formatPKR(originalPrice)}
+                                    </span>
+                                  )}
+                                  <span className="text-[10px] text-gray-400">each</span>
+                                </div>
 
-                          {/* Qty + line total */}
-                          <div className="flex items-center justify-between mt-3">
-                            {/* Qty controls */}
-                            <div
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-full border"
-                              style={{
-                                borderColor: "var(--color-sand)",
-                                backgroundColor: "var(--color-cream)",
-                              }}
-                            >
-                              <button
-                                onClick={() =>
-                                  updateQty(item.id, item.quantity - 1)
-                                }
-                                disabled={loading || item.quantity <= 1}
-                                className="w-5 h-5 flex items-center justify-center font-bold text-base leading-none disabled:opacity-40"
-                                style={{ color: "var(--color-primary)" }}
-                              >
-                                −
-                              </button>
-                              <span className="text-sm font-medium w-5 text-center">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  updateQty(item.id, item.quantity + 1)
-                                }
-                                disabled={loading}
-                                className="w-5 h-5 flex items-center justify-center font-bold text-base leading-none disabled:opacity-40"
-                                style={{ color: "var(--color-primary)" }}
-                              >
-                                +
-                              </button>
-                            </div>
+                                {/* Qty + line total */}
+                                <div className="flex items-center justify-between mt-3">
+                                  {/* Qty controls */}
+                                  <div
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full border"
+                                    style={{
+                                      borderColor: "var(--color-sand)",
+                                      backgroundColor: "var(--color-cream)",
+                                    }}
+                                  >
+                                    <button
+                                      onClick={() =>
+                                        updateQty(item.id, item.quantity - 1)
+                                      }
+                                      disabled={loading || item.quantity <= 1}
+                                      className="w-5 h-5 flex items-center justify-center font-bold text-base leading-none disabled:opacity-40"
+                                      style={{ color: "var(--color-primary)" }}
+                                    >
+                                      −
+                                    </button>
+                                    <span className="text-sm font-medium w-5 text-center">
+                                      {item.quantity}
+                                    </span>
+                                    <button
+                                      onClick={() =>
+                                        updateQty(item.id, item.quantity + 1)
+                                      }
+                                      disabled={loading}
+                                      className="w-5 h-5 flex items-center justify-center font-bold text-base leading-none disabled:opacity-40"
+                                      style={{ color: "var(--color-primary)" }}
+                                    >
+                                      +
+                                    </button>
+                                  </div>
 
-                            {/* Line total */}
-                            <span
-                              className="font-bold text-sm"
-                              style={{ color: "var(--color-text-dark)" }}
-                            >
-                              {formatPKR(item.product.price * item.quantity)}
-                            </span>
-                          </div>
+                                  {/* Line total */}
+                                  <span
+                                    className="font-bold text-sm"
+                                    style={{ color: "var(--color-text-dark)" }}
+                                  >
+                                    {formatPKR(discountedPrice * item.quantity)}
+                                  </span>
+                                </div>
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>

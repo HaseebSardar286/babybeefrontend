@@ -1,6 +1,7 @@
 "use client";
 
 import { CartProvider } from "@/src/context/CartContext";
+import { WishlistProvider } from "@/src/context/WishlistContext";
 import Navbar from "@/src/components/Navbar";
 import { usePathname } from "next/navigation";
 
@@ -13,9 +14,11 @@ export default function ShopLayout({
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/forgot-password") || pathname.startsWith("/reset-password");
 
   return (
-    <CartProvider>
-      {!isAuthPage && <Navbar />}
-      {children}
-    </CartProvider>
+    <WishlistProvider>
+      <CartProvider>
+        {!isAuthPage && <Navbar />}
+          {children}
+      </CartProvider>
+    </WishlistProvider>
   );
 }

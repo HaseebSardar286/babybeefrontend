@@ -13,7 +13,7 @@ interface CartContextType {
   items: CartItem[];
   count: number;
   loading: boolean;
-  addToCart: (productId: number, qty?: number) => Promise<void>;
+  addToCart: (productId: number, qty?: number, size?: string, color?: string) => Promise<void>;
   removeFromCart: (cartItemId: number) => Promise<void>;
   updateQty: (cartItemId: number, quantity: number) => Promise<void>;
   refresh: () => Promise<void>;
@@ -56,7 +56,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  const addToCart = async (productId: number, qty = 1) => {
+  const addToCart = async (productId: number, qty = 1, size?: string, color?: string) => {
     const token = localStorage.getItem("token");
     if (!token) {
       showToast("Please log in to add items to cart");
@@ -64,7 +64,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setLoading(true);
     try {
-      await addToCartAPI(productId, qty);
+      await addToCartAPI(productId, qty, size, color);
       await refresh();
       showToast("Added to cart! 🛒");
     } catch {

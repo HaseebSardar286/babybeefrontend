@@ -10,6 +10,11 @@ export default function AdminSidebar() {
     { name: "Dashboard", path: "/admin", icon: "📊" },
     { name: "Orders", path: "/admin/orders", icon: "📦" },
     { name: "Products", path: "/admin/products", icon: "🧸" },
+    { name: "Categories", path: "/admin/categories", icon: "🗂️" },
+    { name: "Sliders", path: "/admin/sliders", icon: "🖼️" },
+    { name: "Media Gallery", path: "/admin/media", icon: "📷" },
+    { name: "Reviews", path: "/admin/reviews", icon: "⭐" },
+    { name: "Messages", path: "/admin/messages", icon: "✉️" },
     { name: "Customers", path: "/admin/customers", icon: "👥" },
     { name: "Settings", path: "/admin/settings", icon: "⚙️" },
   ];
