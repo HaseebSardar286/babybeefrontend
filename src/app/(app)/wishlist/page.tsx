@@ -156,7 +156,7 @@ export default function WishlistPage() {
   if (loading && count === 0) {
     return (
       <>
-        <main className="min-h-screen pt-40" style={{ backgroundColor: "var(--color-cream)" }}>
+        <main className="min-h-screen pt-10" style={{ backgroundColor: "var(--color-cream)" }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="mb-8">
               <div className="h-8 w-48 bg-gray-200 rounded-full animate-pulse mb-2" />
@@ -232,7 +232,7 @@ export default function WishlistPage() {
       <main className="min-h-screen" style={{ backgroundColor: "var(--color-cream)" }}>
         {/* Header section with decorative gradient */}
         <div
-          className="relative pt-36 pb-12 mb-4 overflow-hidden"
+          className="relative pt-10 pb-12 mb-4 overflow-hidden"
           style={{ background: "linear-gradient(135deg, #fff5f7 0%, #fdf6f0 60%, #f0f7f4 100%)" }}
         >
           {/* Decorative blobs */}

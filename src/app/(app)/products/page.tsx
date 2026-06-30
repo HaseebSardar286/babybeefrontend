@@ -327,7 +327,7 @@ function ProductsContent() {
 
   return (
     <>
-      <main className="min-h-screen pt-30 md:pt-30" style={{ backgroundColor: "var(--color-cream)" }}>
+      <main className="min-h-screen pt-6" style={{ backgroundColor: "var(--color-cream)" }}>
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-6 py-4 text-xs" style={{ color: "var(--color-text-light)" }}>
           <Link href="/">Home</Link> › <span style={{ color: "var(--color-primary)" }}>Products</span>

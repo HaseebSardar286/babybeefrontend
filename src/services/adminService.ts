@@ -113,4 +113,33 @@ export const deleteMediaAPI = async (id: number): Promise<void> => {
   await API.delete(`/admin/media/${id}`);
 };
 
+// ── Blogs API ──────────────────────────────────────────────────────────────
+export interface BlogEntry {
+  id?: number;
+  title: string;
+  content: string;
+  author?: string;
+  imageUrl?: string;
+  createdAt?: string;
+}
+
+export const getAllBlogsAPI = async (): Promise<BlogEntry[]> => {
+  const res = await API.get("/blogs");
+  return res.data.data;
+};
+
+export const createBlogAPI = async (data: BlogEntry): Promise<BlogEntry> => {
+  const res = await API.post("/admin/blogs", data);
+  return res.data.data;
+};
+
+export const updateBlogAPI = async (id: number, data: BlogEntry): Promise<BlogEntry> => {
+  const res = await API.put(`/admin/blogs/${id}`, data);
+  return res.data.data;
+};
+
+export const deleteBlogAPI = async (id: number): Promise<void> => {
+  await API.delete(`/admin/blogs/${id}`);
+};
+
 

@@ -11,13 +11,21 @@ export default function ShopLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/forgot-password") || pathname.startsWith("/reset-password");
+  const isAuthPage = pathname.startsWith("/login") || 
+                     pathname.startsWith("/register") || 
+                     pathname.startsWith("/forgot-password") || 
+                     pathname.startsWith("/reset-password") ||
+                     pathname.startsWith("/checkout");
+  const isHome = pathname === "/";
+  const isAbout = pathname === "/about";
 
   return (
     <WishlistProvider>
       <CartProvider>
         {!isAuthPage && <Navbar />}
+        <div className={!isAuthPage && !isHome && !isAbout ? "pt-24 md:pt-32 pb-10" : ""}>
           {children}
+        </div>
       </CartProvider>
     </WishlistProvider>
   );

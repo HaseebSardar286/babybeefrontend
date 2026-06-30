@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useCart } from "@/src/context/CartContext";
 import { useWishlist } from "@/src/context/WishlistContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { logout } from "@/src/services/authService";
 
 interface NavCategory {
@@ -29,6 +29,23 @@ const FALLBACK_CATEGORIES = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const showSolidNav = scrolled;
+
   const { count, refresh: refreshCart } = useCart();
   const { count: wishlistCount } = useWishlist();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -130,11 +147,11 @@ export default function Navbar() {
 
   return (
     <header
-      style={{
-        backgroundColor: "transparent",
-        borderBottom: "none",
-      }}
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        showSolidNav 
+          ? "bg-[#fdf6f0]/95 backdrop-blur-md border-b border-[#ebd0d3]/40 shadow-sm" 
+          : "bg-transparent"
+      }`}
     >
       {/* Top Value Banner */}
       <div className="bg-[#b5374a] text-white text-[10px] py-1.5 px-6 font-semibold tracking-wider text-center flex items-center justify-center gap-2">

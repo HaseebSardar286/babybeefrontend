@@ -45,35 +45,7 @@ const MOCK_SLIDES = [
   }
 ];
 
-const MOCK_TESTIMONIALS = [
-  { id: 1, stars: 5, text: "Absolutely loved the fabric! It is so soft and lightweight, perfect for my baby's sensitive skin.", author: "Amara, Karachi", tag: "Verified Buyer" },
-  { id: 2, stars: 5, text: "The Rompers and 2-piece sets are beautifully crafted and survive multiple machine washes easily. Highly recommend!", author: "Zainab, Lahore", tag: "Verified Buyer" },
-  { id: 3, stars: 5, text: "Excellent customer service and swift nationwide delivery. JazzCash checkout was smooth and convenient.", author: "Farhan, Islamabad", tag: "Verified Parent" }
-];
 
-const MOCK_BLOGS = [
-  {
-    id: 1,
-    imageUrl: "https://images.unsplash.com/photo-1519689680058-324335c77eb2?w=600&q=80",
-    date: "May 28, 2026",
-    title: "Why GOTS Organic Cotton Matters for Newborns",
-    excerpt: "Newborn skin is incredibly delicate and thin. Discover why shifting to organic threads saves your little one from micro-irritants..."
-  },
-  {
-    id: 2,
-    imageUrl: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=600&q=80",
-    date: "May 15, 2026",
-    title: "Building the Perfect Baby Capsule Wardrobe",
-    excerpt: "You don't need a hundred items. Learn how a simple collection of rompers, 2-piece sets, and jumpsuits keep your baby comfortable 24/7..."
-  },
-  {
-    id: 3,
-    imageUrl: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80",
-    date: "May 02, 2026",
-    title: "Understanding Baby Sleepwear Safety Standards",
-    excerpt: "From tog ratings to thermal comfort, we cover how to choose the right fabric blends for your child depending on the season..."
-  }
-];
 
 const CARD_COLORS = ["#f7f0e8", "#e8f0e8", "#e8eef5", "#f5eee8", "#eee8f5", "#e8f5f0"];
 const CARD_EMOJIS = ["👕", "🧥", "🌿", "🛏️", "🍼", "🎁", "👶", "🧸"];
@@ -295,6 +267,7 @@ export default function HomePage() {
   const [slides, setSlides] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [quickViewId, setQuickViewId] = useState<number | null>(null);
   const { addToCart, loading: cartLoading } = useCart();
@@ -340,8 +313,8 @@ export default function HomePage() {
       })
       .catch(() => setCategories([]));
 
-    // 4. Fetch reviews/testimonials from backend or default to mocks
-    API.get("/admin/reviews")
+    // 4. Fetch reviews/testimonials from backend
+    API.get("/reviews")
       .then((res) => {
         if (res.data?.success && res.data.data?.length > 0) {
           const formatted = res.data.data.slice(0, 3).map((r: any) => ({
@@ -353,10 +326,21 @@ export default function HomePage() {
           }));
           setTestimonials(formatted);
         } else {
-          setTestimonials(MOCK_TESTIMONIALS);
+          setTestimonials([]);
         }
       })
-      .catch(() => setTestimonials(MOCK_TESTIMONIALS));
+      .catch(() => setTestimonials([]));
+
+    // 5. Fetch blogs from backend
+    API.get("/blogs")
+      .then((res) => {
+        if (res.data?.success && res.data.data?.length > 0) {
+          setBlogs(res.data.data);
+        } else {
+          setBlogs([]);
+        }
+      })
+      .catch(() => setBlogs([]));
   }, []);
 
   // Automatic hero slide transition
@@ -736,34 +720,45 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {MOCK_BLOGS.map((blog) => (
-              <article key={blog.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover-lift flex flex-col group">
-                <div className="h-44 overflow-hidden relative">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={blog.imageUrl}
-                    alt={blog.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-md text-[9px] font-semibold text-[#b5374a]">
-                    {blog.date}
+            {blogs.slice(0, 3).map((blog) => {
+              const dateText = blog.createdAt
+                ? new Date(blog.createdAt).toLocaleDateString("en-PK", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric"
+                  })
+                : "June 2026";
+              const excerpt = blog.excerpt || (blog.content ? (blog.content.length > 130 ? blog.content.substring(0, 130) + "..." : blog.content) : "");
+              const linkHref = `/blogs/${blog.id}`;
+              return (
+                <article key={blog.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover-lift flex flex-col group">
+                  <div className="h-44 overflow-hidden relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={blog.imageUrl || "https://images.unsplash.com/photo-1519689680058-324335c77eb2?w=600&q=80"}
+                      alt={blog.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-md text-[9px] font-semibold text-[#b5374a]">
+                      {dateText}
+                    </div>
                   </div>
-                </div>
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-bold text-sm text-gray-800 leading-snug mb-2 hover:text-[#b5374a] transition-colors font-lora">
-                      {blog.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-4">
-                      {blog.excerpt}
-                    </p>
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-800 leading-snug mb-2 hover:text-[#b5374a] transition-colors font-lora">
+                        {blog.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 leading-relaxed mb-4">
+                        {excerpt}
+                      </p>
+                    </div>
+                    <Link href={linkHref} className="text-xs font-bold text-[#b5374a] hover:text-[#8c2536] transition-colors mt-2 inline-block">
+                      Read More &rarr;
+                    </Link>
                   </div>
-                  <Link href="/products" className="text-xs font-bold text-[#b5374a] hover:text-[#8c2536] transition-colors mt-2 inline-block">
-                    Read More &rarr;
-                  </Link>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </section>
 

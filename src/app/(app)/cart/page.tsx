@@ -8,7 +8,6 @@ import { formatPKR, CartItem } from "@/src/services/productService";
 const CARD_EMOJIS = ["👕", "🧥", "🌿", "🛏️", "🍼", "🎁", "👶", "🧸"];
 const SHIPPING_THRESHOLD = 5000; // Free delivery over Rs. 5,000
 const SHIPPING_COST = 250; // Flat Rs. 250 delivery otherwise
-const TAX_RATE = 0.17; // 17% GST Pakistan
 
 export default function CartPage() {
   const { items, count, loading, removeFromCart, updateQty } = useCart();
@@ -31,32 +30,36 @@ export default function CartPage() {
   }, 0);
 
   const shipping = subtotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-  const gst = +(subtotal * TAX_RATE);
-  const total = subtotal + shipping + gst;
+  const total = subtotal + shipping;
 
+  // Empty state
   if (!loading && items.length === 0) {
     return (
       <>
         <main
-          className="min-h-screen flex items-center justify-center"
+          className="min-h-screen flex items-center justify-center pt-24 pb-16 animate-fadeIn"
           style={{ backgroundColor: "var(--color-cream)" }}
         >
           <div className="text-center max-w-sm px-6">
-            <div className="text-7xl mb-5">🛒</div>
+            <div className="relative w-32 h-32 mx-auto mb-6">
+              <div className="absolute inset-0 rounded-full bg-rose-50 animate-pulse" />
+              <div className="relative flex items-center justify-center w-full h-full text-6xl">
+                🛒
+              </div>
+            </div>
             <h1
-              className="text-2xl font-bold mb-3"
+              className="text-2xl font-bold font-lora mb-3"
               style={{ color: "var(--color-text-dark)" }}
             >
-              Your cart is empty
+              Your Cart is Empty
             </h1>
             <p
-              className="text-sm mb-8"
+              className="text-xs mb-8 leading-relaxed"
               style={{ color: "var(--color-text-light)" }}
             >
-              Browse our organic baby products and pick out something special
-              for your little one.
+              Browse our organic baby products and pick out something special for your little nestling.
             </p>
-            <Link href="/products" className="btn-primary">
+            <Link href="/products" className="btn-primary px-8 py-3 rounded-full text-xs font-bold uppercase tracking-wider shadow-md hover-lift">
               Start Shopping
             </Link>
           </div>
@@ -69,115 +72,95 @@ export default function CartPage() {
   return (
     <>
       <main
-        className="min-h-screen"
+        className="min-h-screen pt-4 pb-16 animate-fadeIn"
         style={{ backgroundColor: "var(--color-cream)" }}
       >
         {/* Breadcrumb */}
         <div
-          className="max-w-7xl mx-auto px-4 sm:px-6 py-4 text-xs"
+          className="max-w-7xl mx-auto px-6 py-4 text-[10px] uppercase tracking-wider font-semibold"
           style={{ color: "var(--color-text-light)" }}
         >
-          <Link href="/" className="hover:underline">
+          <Link href="/" className="hover:text-[#b5374a] transition-colors">
             Home
           </Link>{" "}
-          › <span style={{ color: "var(--color-primary)" }}>Shopping Cart</span>
+          <span className="mx-2">/</span>{" "}
+          <span style={{ color: "var(--color-primary)" }}>Shopping Bag</span>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+        <div className="max-w-7xl mx-auto px-6">
           {/* Header */}
           <div className="mb-8">
+            <span className="text-[10px] font-bold text-[#b5374a] uppercase tracking-widest">Your Bag</span>
             <h1
-              className="text-3xl font-bold"
-              style={{ color: "var(--color-text-dark)" }}
+              className="text-3xl sm:text-4xl font-bold font-lora mt-1 text-gray-800"
             >
-              Your Shopping Bag
+              Shopping Cart
             </h1>
             <p
-              className="text-sm mt-1"
+              className="text-xs mt-1"
               style={{ color: "var(--color-text-light)" }}
             >
-              {count} {count === 1 ? "item" : "items"} in your cart
+              You have {count} {count === 1 ? "item" : "items"} in your cart.
             </p>
           </div>
 
-          {/* Free shipping banner */}
-          {subtotal < SHIPPING_THRESHOLD && (
-            <div
-              className="mb-6 px-5 py-3 rounded-2xl text-sm flex items-center gap-3"
-              style={{ backgroundColor: "#e8f5e9", color: "#2e7d32" }}
-            >
-              <span className="text-xl">🚚</span>
-              <span>
-                Free delivery on orders above {formatPKR(SHIPPING_THRESHOLD)}{" "}
-                (Add <strong>{formatPKR(SHIPPING_THRESHOLD - subtotal)}</strong>{" "}
-                more)
+          {/* Shipping Threshold Progress */}
+          <div className="mb-8 bg-white border border-[#ebd0d3]/30 rounded-3xl p-5 shadow-2xs">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs font-semibold text-gray-700">
+                {subtotal >= SHIPPING_THRESHOLD ? (
+                  <span className="text-emerald-600 font-bold">🎉 Congratulations! You qualify for Free Shipping!</span>
+                ) : (
+                  <span>
+                    Add <strong className="text-[#b5374a]">{formatPKR(SHIPPING_THRESHOLD - subtotal)}</strong> more for <strong>FREE Delivery</strong>
+                  </span>
+                )}
               </span>
+              <span className="text-xs font-bold text-gray-400">Rs. 5,000 Threshold</span>
             </div>
-          )}
-          {subtotal >= SHIPPING_THRESHOLD && (
-            <div
-              className="mb-6 px-5 py-3 rounded-2xl text-sm flex items-center gap-3"
-              style={{ backgroundColor: "#e8f5e9", color: "#2e7d32" }}
-            >
-              <span className="text-xl">🎉</span>
-              <span>Congratulations! You qualify for FREE delivery!</span>
+            <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-teal-500 transition-all duration-500 ease-out"
+                style={{ width: `${Math.min(100, (subtotal / SHIPPING_THRESHOLD) * 100)}%` }}
+              />
             </div>
-          )}
+          </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* ── Cart Items ─────────────────────────────────────── */}
+            
+            {/* Left Column: Cart Items List */}
             <div className="flex-1 min-w-0">
               {loading ? (
                 <div className="space-y-4">
                   {[1, 2].map((i) => (
                     <div
                       key={i}
-                      className="rounded-2xl p-5 animate-pulse"
-                      style={{ backgroundColor: "white" }}
+                      className="rounded-3xl p-6 bg-white border border-gray-150/15 animate-pulse flex gap-4"
                     >
-                      <div className="flex gap-4">
-                        <div
-                          className="w-20 h-20 rounded-xl flex-shrink-0"
-                          style={{ backgroundColor: "var(--color-sand)" }}
-                        />
-                        <div className="flex-1 space-y-2 pt-1">
-                          <div
-                            className="h-4 w-1/2 rounded"
-                            style={{
-                              backgroundColor: "var(--color-blush-mid)",
-                            }}
-                          />
-                          <div
-                            className="h-3 w-1/3 rounded"
-                            style={{
-                              backgroundColor: "var(--color-blush-mid)",
-                            }}
-                          />
-                        </div>
+                      <div className="w-24 h-24 rounded-2xl bg-gray-200" />
+                      <div className="flex-1 space-y-3 pt-2">
+                        <div className="h-4 w-1/2 rounded bg-gray-200" />
+                        <div className="h-3 w-1/3 rounded bg-gray-200" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="rounded-2xl p-4 sm:p-5"
-                      style={{
-                        backgroundColor: "white",
-                        boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-                      }}
-                    >
-                      <div className="flex gap-4">
-                        {/* Dynamic Image or Emoji thumbnail */}
+                  {items.map((item) => {
+                    const { originalPrice, discountedPrice, hasDiscount } = getItemPrices(item);
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-3xl p-5 bg-white border border-[#ebd0d3]/30 hover:border-[#ebd0d3]/65 transition-all duration-300 shadow-2xs hover:shadow-xs flex flex-col sm:flex-row gap-5 relative group"
+                      >
+                        {/* Image Column */}
                         <Link
                           href={`/products/${item.product.id}`}
-                          className="flex-shrink-0"
+                          className="flex-shrink-0 mx-auto sm:mx-0"
                         >
                           <div
-                            className="w-20 h-20 rounded-xl flex items-center justify-center text-4xl overflow-hidden border"
-                            style={{ backgroundColor: "var(--color-blush)" }}
+                            className="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl overflow-hidden border bg-gray-50 border-gray-100"
                           >
                             {item.product.imageUrl || (item.product.images && item.product.images.length > 0) ? (
                               // eslint-disable-next-line @next/next/no-img-element
@@ -192,37 +175,38 @@ export default function CartPage() {
                           </div>
                         </Link>
 
-                        {/* Details */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
+                        {/* Detail Column */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between pt-1">
+                          <div className="flex items-start justify-between gap-4">
                             <div className="min-w-0">
                               <Link href={`/products/${item.product.id}`}>
                                 <h3
-                                  className="font-semibold text-sm leading-snug truncate"
-                                  style={{ color: "var(--color-text-dark)" }}
+                                  className="font-bold text-base text-gray-800 font-lora hover:text-[#b5374a] transition-colors leading-snug truncate"
                                 >
                                   {item.product.name}
                                 </h3>
                               </Link>
-                              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                              
+                              {/* Product Tags and Variations */}
+                              <div className="flex flex-wrap items-center gap-1.5 mt-2">
                                 {item.product.category && (
                                   <span
-                                    className="text-xs px-2 py-0.5 rounded-full"
+                                    className="text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"
                                     style={{
                                       backgroundColor: "var(--color-blush)",
-                                      color: "var(--color-text-mid)",
+                                      color: "var(--color-primary)",
                                     }}
                                   >
                                     {item.product.category}
                                   </span>
                                 )}
                                 {item.size && (
-                                  <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-500 font-semibold uppercase tracking-wider">
+                                  <span className="text-[9px] px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 font-bold uppercase tracking-wider border border-gray-200/50">
                                     Size: {item.size}
                                   </span>
                                 )}
                                 {item.color && (
-                                  <span className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-500 font-semibold flex items-center gap-1">
+                                  <span className="text-[9px] px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 font-bold flex items-center gap-1.5 border border-gray-200/50">
                                     Color: {item.color.includes(":") ? (
                                       <>
                                         <span
@@ -238,12 +222,12 @@ export default function CartPage() {
                                 )}
                               </div>
                             </div>
-                            {/* Delete button */}
+
+                            {/* Delete/Remove button */}
                             <button
                               onClick={() => removeFromCart(item.id)}
                               disabled={loading}
-                              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-red-50"
-                              style={{ color: "#e53935" }}
+                              className="w-9 h-9 rounded-full flex items-center justify-center transition-colors bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 cursor-pointer shadow-3xs"
                               title="Remove item"
                               aria-label="Remove item"
                             >
@@ -262,246 +246,163 @@ export default function CartPage() {
                             </button>
                           </div>
 
-                          {/* Unit price */}
-                          {(() => {
-                            const { originalPrice, discountedPrice, hasDiscount } = getItemPrices(item);
-                            return (
-                              <>
-                                <div className="flex items-center gap-2 mt-1.5">
-                                  {hasDiscount ? (
-                                    <>
-                                      <span className="font-bold text-xs text-red-600">
-                                        {formatPKR(discountedPrice)}
-                                      </span>
-                                      <span className="text-[10px] text-gray-400 line-through">
-                                        {formatPKR(originalPrice)}
-                                      </span>
-                                    </>
-                                  ) : (
-                                    <span className="font-semibold text-xs" style={{ color: "var(--color-primary)" }}>
-                                      {formatPKR(originalPrice)}
-                                    </span>
-                                  )}
-                                  <span className="text-[10px] text-gray-400">each</span>
-                                </div>
+                          {/* Pricing & Quantity row */}
+                          <div className="flex flex-wrap items-center justify-between gap-4 mt-4 pt-3 border-t border-gray-50">
+                            {/* Quantity Controls */}
+                            <div
+                              className="flex items-center gap-3 px-3 py-1.5 rounded-full border border-gray-200 bg-white"
+                            >
+                              <button
+                                onClick={() => updateQty(item.id, item.quantity - 1)}
+                                disabled={loading || item.quantity <= 1}
+                                className="w-5 h-5 flex items-center justify-center font-bold text-sm cursor-pointer disabled:opacity-40"
+                                style={{ color: "var(--color-primary)" }}
+                              >
+                                −
+                              </button>
+                              <span className="text-xs font-bold w-5 text-center text-gray-700">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateQty(item.id, item.quantity + 1)}
+                                disabled={loading}
+                                className="w-5 h-5 flex items-center justify-center font-bold text-sm cursor-pointer disabled:opacity-40"
+                                style={{ color: "var(--color-primary)" }}
+                              >
+                                +
+                              </button>
+                            </div>
 
-                                {/* Qty + line total */}
-                                <div className="flex items-center justify-between mt-3">
-                                  {/* Qty controls */}
-                                  <div
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-full border"
-                                    style={{
-                                      borderColor: "var(--color-sand)",
-                                      backgroundColor: "var(--color-cream)",
-                                    }}
-                                  >
-                                    <button
-                                      onClick={() =>
-                                        updateQty(item.id, item.quantity - 1)
-                                      }
-                                      disabled={loading || item.quantity <= 1}
-                                      className="w-5 h-5 flex items-center justify-center font-bold text-base leading-none disabled:opacity-40"
-                                      style={{ color: "var(--color-primary)" }}
-                                    >
-                                      −
-                                    </button>
-                                    <span className="text-sm font-medium w-5 text-center">
-                                      {item.quantity}
+                            {/* Prices */}
+                            <div className="text-right">
+                              <div className="flex items-center gap-2 justify-end">
+                                {hasDiscount ? (
+                                  <>
+                                    <span className="font-extrabold text-sm text-red-600">
+                                      {formatPKR(discountedPrice * item.quantity)}
                                     </span>
-                                    <button
-                                      onClick={() =>
-                                        updateQty(item.id, item.quantity + 1)
-                                      }
-                                      disabled={loading}
-                                      className="w-5 h-5 flex items-center justify-center font-bold text-base leading-none disabled:opacity-40"
-                                      style={{ color: "var(--color-primary)" }}
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-
-                                  {/* Line total */}
-                                  <span
-                                    className="font-bold text-sm"
-                                    style={{ color: "var(--color-text-dark)" }}
-                                  >
-                                    {formatPKR(discountedPrice * item.quantity)}
+                                    <span className="text-xs text-gray-400 line-through">
+                                      {formatPKR(originalPrice * item.quantity)}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="font-extrabold text-sm text-gray-800">
+                                    {formatPKR(originalPrice * item.quantity)}
                                   </span>
-                                </div>
-                              </>
-                            );
-                          })()}
+                                )}
+                              </div>
+                              <span className="text-[10px] text-gray-400 font-semibold block">
+                                {formatPKR(discountedPrice)} each
+                              </span>
+                            </div>
+                          </div>
+
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
-              <div className="mt-6 flex items-center justify-between">
+              {/* Continue Shopping Link */}
+              <div className="mt-8">
                 <Link
                   href="/products"
-                  className="text-sm font-medium flex items-center gap-1"
-                  style={{ color: "var(--color-primary)" }}
+                  className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-[#b5374a] hover:underline"
                 >
                   ← Continue Shopping
                 </Link>
               </div>
-
-              {/* Delivery info */}
-              <div
-                className="mt-6 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center"
-                style={{ backgroundColor: "var(--color-blush)" }}
-              >
-                {[
-                  {
-                    icon: "🚚",
-                    title: "Fast Delivery",
-                    sub: "2-4 days nationwide",
-                  },
-                  { icon: "🔄", title: "Easy Returns", sub: "Within 30 days" },
-                  {
-                    icon: "💳",
-                    title: "Payment",
-                    sub: "JazzCash · Easypaisa · COD",
-                  },
-                ].map((b) => (
-                  <div key={b.title}>
-                    <div className="text-2xl mb-1">{b.icon}</div>
-                    <p
-                      className="font-semibold text-xs"
-                      style={{ color: "var(--color-text-dark)" }}
-                    >
-                      {b.title}
-                    </p>
-                    <p
-                      className="text-xs mt-0.5"
-                      style={{ color: "var(--color-text-light)" }}
-                    >
-                      {b.sub}
-                    </p>
-                  </div>
-                ))}
-              </div>
             </div>
 
-            {/* ── Order Summary ─────────────────────────────────── */}
+            {/* Right Column: Summary & Promotion */}
             <div className="w-full lg:w-80 flex-shrink-0">
               <div
-                className="rounded-2xl p-6 sticky top-24"
+                className="rounded-3xl p-6 sticky top-24 border border-[#ebd0d3]/30 shadow-2xs space-y-6"
                 style={{ backgroundColor: "var(--color-blush)" }}
               >
                 <h3
-                  className="font-bold text-lg mb-5"
-                  style={{ color: "var(--color-text-dark)" }}
+                  className="font-bold text-lg font-lora border-b pb-3 text-gray-800"
+                  style={{ borderColor: "var(--color-blush-mid)" }}
                 >
                   Order Summary
                 </h3>
 
-                <div className="space-y-3 text-sm mb-5">
+                <div className="space-y-3.5 text-xs">
                   <div className="flex justify-between">
-                    <span style={{ color: "var(--color-text-mid)" }}>
+                    <span className="font-medium" style={{ color: "var(--color-text-mid)" }}>
                       Subtotal ({count} items)
                     </span>
-                    <span style={{ color: "var(--color-text-dark)" }}>
+                    <span className="font-bold text-gray-800">
                       {formatPKR(subtotal)}
                     </span>
                   </div>
 
                   <div className="flex justify-between">
-                    <span style={{ color: "var(--color-text-mid)" }}>
+                    <span className="font-medium" style={{ color: "var(--color-text-mid)" }}>
                       Delivery Charges
                     </span>
                     {shipping === 0 ? (
                       <span
-                        style={{ color: "var(--color-sage)" }}
-                        className="font-medium"
+                        style={{ color: "var(--color-teal)" }}
+                        className="font-bold uppercase tracking-wider text-[10px]"
                       >
-                        FREE 🎉
+                        Free Delivery 🎉
                       </span>
                     ) : (
-                      <span style={{ color: "var(--color-text-dark)" }}>
+                      <span className="font-bold text-gray-800">
                         {formatPKR(shipping)}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex justify-between">
-                    <span style={{ color: "var(--color-text-mid)" }}>
-                      GST (17%)
-                    </span>
-                    <span style={{ color: "var(--color-text-dark)" }}>
-                      {formatPKR(gst)}
-                    </span>
-                  </div>
-
                   <div
-                    className="flex justify-between font-bold text-base pt-4 border-t"
-                    style={{ borderColor: "rgba(0,0,0,0.08)" }}
+                    className="flex justify-between font-bold text-sm pt-4 border-t"
+                    style={{ borderColor: "var(--color-blush-mid)" }}
                   >
                     <span style={{ color: "var(--color-text-dark)" }}>
-                      Total
+                      Estimated Total
                     </span>
-                    <span style={{ color: "var(--color-primary)" }}>
+                    <span className="text-base" style={{ color: "var(--color-primary)" }}>
                       {formatPKR(total)}
                     </span>
                   </div>
                 </div>
 
-                {/* Payment methods */}
-                <div
-                  className="flex flex-wrap gap-2 mb-5 p-3 rounded-xl justify-center"
-                  style={{ backgroundColor: "white" }}
-                >
-                  {["JazzCash", "Easypaisa", "COD", "Card"].map((pm) => (
-                    <span
-                      key={pm}
-                      className="text-xs px-2.5 py-1 rounded-full font-medium"
-                      style={{
-                        backgroundColor: "var(--color-blush)",
-                        color: "var(--color-text-mid)",
-                      }}
-                    >
-                      {pm}
-                    </span>
-                  ))}
-                </div>
-
+                {/* Checkout Link */}
                 <Link
                   href="/checkout"
-                  className="btn-primary w-full text-center py-4 block"
+                  className="btn-primary w-full text-center py-3.5 block font-bold text-xs uppercase tracking-widest shadow-md hover-lift"
                 >
                   Proceed to Checkout
                 </Link>
 
+                {/* Secure SSL indicator */}
                 <p
-                  className="text-center text-xs mt-3 flex items-center justify-center gap-1"
-                  style={{ color: "var(--color-text-light)" }}
+                  className="text-center text-[10px] font-semibold flex items-center justify-center gap-1.5 text-gray-400"
                 >
-                  🔒 Secure SSL Payment
+                  🔒 Secure SSL 256-bit Encrypted Checkout
                 </p>
 
-                {/* BabyBee promise */}
+                {/* Promise Block */}
                 <div
-                  className="mt-5 p-4 rounded-xl"
-                  style={{ backgroundColor: "white" }}
+                  className="p-4 rounded-2xl bg-white/70 border border-white/50"
                 >
                   <p
-                    className="text-xs font-bold mb-1"
+                    className="text-[10px] font-bold mb-1"
                     style={{ color: "var(--color-primary)" }}
                   >
-                    🐝 BABYBEE PROMISE
+                    🐝 THE BABYBEE PROMISE
                   </p>
                   <p
-                    className="text-xs leading-relaxed"
-                    style={{ color: "var(--color-text-light)" }}
+                    className="text-[10px] leading-relaxed text-gray-500"
                   >
-                    100% authentic & organic products. 30 days return policy.
-                    Fast delivery across Pakistan.
+                    We guarantee 100% skin-safe organic apparel. 30 days hassle-free returns. Swift support at info@babybee.com.
                   </p>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </main>

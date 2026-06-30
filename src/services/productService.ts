@@ -123,3 +123,30 @@ export const toggleWishlistAPI = async (
 export const removeFromWishlistAPI = async (productId: number): Promise<void> => {
   await API.delete(`/wishlist/${productId}`);
 };
+
+// ── Reviews API ─────────────────────────────────────────────────────────────
+export interface Review {
+  id?: number;
+  productId: number;
+  reviewerName: string;
+  rating: number;
+  comment: string;
+  createdAt?: string;
+}
+
+/** Returns all reviews for a product. */
+export const getProductReviews = async (productId: number): Promise<Review[]> => {
+  const res = await API.get(`/products/${productId}/reviews`);
+  return res.data.data;
+};
+
+/** Submits a review for a product. */
+export const addProductReview = async (
+  productId: number,
+  reviewerName: string,
+  rating: number,
+  comment: string
+): Promise<Review> => {
+  const res = await API.post(`/products/${productId}/reviews`, { reviewerName, rating, comment });
+  return res.data.data;
+};
